@@ -1,0 +1,27 @@
+@font-face {
+    font-family: 'Nunito', sans-serif;
+    src: url("../fonts/Nunito/Nunito-Bold.ttf") format('truetype'),
+    url("../fonts/Nunito/Nunito-ExtraBold.ttf") format('truetype'),
+    url("../fonts/Nunito/Nunito-ExtraLight.ttf") format('truetype'),
+    url("../fonts/Nunito/Nunito-Light.ttf") format('truetype'),
+    url("../fonts/Nunito/Nunito-Regular.ttf") format('truetype');
+}
+
+body {
+    background-color: #222831;
+    font-family: 'Nunito', sans-serif;
+}
+
+.form-control {
+    height: 50px;
+}
+
+.form-control:focus {
+    box-shadow: none;
+    border: solid 1px #f6b517;
+}
+
+form label {
+    font-weight: bolder;
+    color: #313131;
+}
