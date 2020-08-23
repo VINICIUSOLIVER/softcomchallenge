@@ -1,3 +1,5 @@
 export default interface LoginStateContract {
-    url: string
+    url: string,
+    login: boolean,
+    loginMessage: string
 };

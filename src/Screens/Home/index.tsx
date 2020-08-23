@@ -1,89 +1,95 @@
-import React, {Component, Dispatch, SetStateAction} from "react";
-
-import {Row, Col, Table} from "react-bootstrap";
+import React, {useEffect, useState} from "react";
+import {Row, Col, Dropdown} from "react-bootstrap";
 import {ButtonPrimary, ButtonWarning} from "../../Components/Buttons/Button";
 
-import RoutePropsContract from "../../Router/Contracts/RoutePropsContract";
+import {AxiosResponse} from "axios";
 
-import {searchProducts} from "../../Services/Product";
-import LoadingContext from "../../Contexts/Loading/Loading";
+import {searchProducts as searchProductsApi} from "../../Services/Product";
 import ProductList from "../../Components/Product/ProductList";
+import ApiResponseContract from "../../Contracts/Default/ApiResponseContract";
+import {useLoading} from "../../Contexts/Loading/LoadingContext";
+import {useAlert} from "../../Contexts/Alert/AlertContext";
+import ProductContract from "../../Contracts/Product/ProductContract";
+import {useAuth} from "../../Contexts/Auth/AuthContext";
+import RoutePropsContract from "../../Contracts/Default/RoutePropsContract";
 
-interface ProductContract {
-    id: string,
-    nome: string,
-    estoque: number,
-    unidade_medida: string,
-    vender: boolean,
-    preco_venda: number
+export default function Home(props: RoutePropsContract) {
+    const [data, setData] = useState<Array<any>>([]);
+    const [page, setPage] = useState<number>(1);
+    const [next, setNext] = useState<null|number>(null);
+    const {setLoading} = useLoading();
+    const {success, warning, danger} = useAlert();
+    const {token, singOut} = useAuth();
+
+    useEffect(() => {
+        // searchProducts();
+    }, []);
+
+    async function searchProducts(): Promise<void> {
+        setLoading(true);
+        const response = await searchProductsApi(token)
+            .then((response: AxiosResponse<ApiResponseContract<Array<any>>>) => {
+                console.log(response.data);
+                if (response.data.code === 1) {
+                    setData(response.data.data);
+                    setLoading(false);
+
+                    return false;
+                }
+
+                danger(response.data.human);
+            }).catch((error : string) => {
+                danger(error);
+            });
+    }
+
+    return (
+        <Row className="justify-content-md-center">
+            <Col xs={12} style={{backgroundColor: "#fff", paddingTop: 20, paddingBottom: 20, marginBottom: 20}}>
+                <Row className="justify-content-md-center">
+                    <Col xs={10}>
+                        <Row>
+                            <Col xs={6}>
+                                <img src="/images/logo-softcom.png" alt="Logo Softcom" title="Logo Softcom" style={{width: "20%"}}/>
+                            </Col>
+                            <Col xs={6} style={{textAlign: "right"}}>
+                                <Dropdown>
+                                    <Dropdown.Toggle variant="warning" id="dropdown-basic" style={{color: "#fff"}}>
+                                        {localStorage.getItem("@softcomchallenge/client_company_fantasy")} - {localStorage.getItem("@softcomchallenge/client_company_name")}
+                                    </Dropdown.Toggle>
+
+                                    <Dropdown.Menu>
+                                        <Dropdown.Item href="#" onClick={() => {
+                                            if (singOut()) {
+                                                {props.history.push("/")}
+                                            }
+                                        }}>Logout</Dropdown.Item>
+                                    </Dropdown.Menu>
+                                </Dropdown>
+                            </Col>
+                        </Row>
+                    </Col>
+                </Row>
+            </Col>
+            <Col xs={10}>
+                <Row>
+                    <Col xs={6}>
+                        <ButtonWarning>
+                            Pesquisar
+                        </ButtonWarning>
+                    </Col>
+                    <Col xs={6} style={{textAlign: "right"}}>
+                        <ButtonPrimary>
+                            Adicionar
+                        </ButtonPrimary>
+                    </Col>
+                </Row>
+                <Row style={{backgroundColor: "#fff", marginTop: 20}}>
+                    <Col>
+                        <ProductList data={data} />
+                    </Col>
+                </Row>
+            </Col>
+        </Row>
+    );
 }
-
-interface HomeStateContract {
-    data: Array<ProductContract>,
-    page: number,
-    next: number|null
-}
-
-class Home extends Component<RoutePropsContract, HomeStateContract> {
-    static contextType = LoadingContext;
-
-    constructor(props: RoutePropsContract) {
-        super(props);
-
-        this.state = {
-            data: [],
-            page: 1,
-            next: null
-        }
-    }
-
-    componentDidMount() {
-        this.search();
-    }
-
-    search = () => {
-        this.context.setLoading(true);
-
-        searchProducts().then(response => {
-            if (response.data.code === 1) {
-                this.setState({
-                    data: response.data.data
-                });
-            } else {
-                alert("Algo de errado aconteceu");
-            }
-        }).catch(error => {
-            alert(`Error ${error}`);
-        }).finally(() => {
-            this.context.setLoading(false);
-        })
-    }
-
-    render() {
-        return (
-            <Row className="justify-content-md-center">
-                <Col xs={8}>
-                    <Row>
-                        <Col xs={6}>
-                            <ButtonWarning>
-                                Pesquisar
-                            </ButtonWarning>
-                        </Col>
-                        <Col xs={6}>
-                            <ButtonPrimary>
-                                Adicionar
-                            </ButtonPrimary>
-                        </Col>
-                    </Row>
-                    <Row style={{backgroundColor: "#fff", marginTop: 20}}>
-                        <Col>
-                            <ProductList data={this.state.data}/>
-                        </Col>
-                    </Row>
-                </Col>
-            </Row>
-        );
-    }
-}
-
-export default Home;

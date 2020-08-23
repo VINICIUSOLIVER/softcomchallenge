@@ -29,7 +29,7 @@ class ProductList extends Component<ProductListContract, ProductListContract> {
                 <tbody>
                     {this.props.data.map((item, key) => {
                         return (
-                            <ProductItem {...item} />
+                            <ProductItem {...item} key={key}/>
                         );
                     })}
                 </tbody>
