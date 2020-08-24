@@ -48,7 +48,6 @@ export default function AuthProvider(props: ChildrenContextContract) {
                 return true;
             }).catch((error: string) => {
                 setLogged(false);
-                danger(error);
 
                 return false;
             });
@@ -79,11 +78,11 @@ export default function AuthProvider(props: ChildrenContextContract) {
                 danger(response.data.human);
 
                 return false;
-            }).catch((error: string) => {
+            }).catch((error: Object) => {
                 localStorage.clear();
 
                 setLogged(false);
-                danger(error);
+                danger(error.toString());
 
                 return false;
             });
