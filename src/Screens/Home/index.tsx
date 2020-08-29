@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from "react";
-import {Row, Col, Dropdown, Modal, Button, Form} from "react-bootstrap";
-import {ButtonPrimary, ButtonWarning} from "../../Components/Buttons/Button";
+import {Row, Col, Dropdown, Form} from "react-bootstrap";
+import {ButtonPrimary} from "../../Components/Buttons/Button";
 
 import {AxiosResponse} from "axios";
 
@@ -15,25 +15,23 @@ import RoutePropsContract from "../../Contracts/Default/RoutePropsContract";
 import FormProduct from "../../Components/Product/FormProduct";
 
 export default function Home(props: RoutePropsContract) {
-    const [data, setData] = useState<Array<ProductContract>>([]);
-    const [page, setPage] = useState<number>(1);
-    const [next, setNext] = useState<null|number>(null);
+    const [dataOriginal, setDataOriginal] = useState<Array<ProductContract>>([]);
+    const [dataView, setDataView] = useState<Array<ProductContract>>([]);
     const {setLoading} = useLoading();
     const {success, warning, danger} = useAlert();
     const {token, singOut} = useAuth();
     const [showModal, setShowModal] = useState<boolean>(false);
 
     useEffect(() => {
-        // searchProducts();
+        searchProducts();
     }, []);
 
     async function searchProducts(): Promise<void> {
         setLoading(true);
         const response = await searchProductsApi(token)
             .then((response: AxiosResponse<ApiResponseContract<Array<ProductContract>>>) => {
-                console.log(response.data);
                 if (response.data.code === 1) {
-                    setData(response.data.data);
+                    setDataOriginal(response.data.data);
                     setLoading(false);
 
                     return false;
@@ -41,6 +39,7 @@ export default function Home(props: RoutePropsContract) {
 
                 danger(response.data.human);
             }).catch((error : Object) => {
+                setLoading(false);
                 danger(error.toString());
             });
     }
@@ -85,12 +84,23 @@ export default function Home(props: RoutePropsContract) {
                 </Col>
                 <Col xs={10}>
                     <Row>
-                        <Col xs={6}>
-                            <ButtonWarning>
-                                Pesquisar
-                            </ButtonWarning>
+                        <Col xs={2}>
+                            <Form>
+                                <Form.Control type="text" placeholder="Pesquisar" onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                                    let search = event.target.value.toLocaleLowerCase(),
+                                        productSearch = dataOriginal.filter((item) => {
+                                            if (item.nome.toLocaleLowerCase().includes(search)) {
+                                                return true;
+                                            }
+
+                                            return false;
+                                        });
+
+                                    setDataView(productSearch);
+                                }}/>
+                            </Form>
                         </Col>
-                        <Col xs={6} style={{textAlign: "right"}}>
+                        <Col xs={10} style={{textAlign: "right"}}>
                             <ButtonPrimary onClick={openModal}>
                                 Adicionar
                             </ButtonPrimary>
@@ -98,7 +108,7 @@ export default function Home(props: RoutePropsContract) {
                     </Row>
                     <Row style={{backgroundColor: "#fff", marginTop: 20}}>
                         <Col>
-                            {/*<ProductList data={data} />*/}
+                            <ProductList data={dataView.length > 0 ? dataView : dataOriginal} />
                         </Col>
                     </Row>
                 </Col>

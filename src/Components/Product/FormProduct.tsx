@@ -19,7 +19,6 @@ export default function FormProduct(props: {showModal: boolean}) {
         event.preventDefault();
 
         store();
-
     }
 
     async function store() {
@@ -36,13 +35,34 @@ export default function FormProduct(props: {showModal: boolean}) {
         })
     }
 
-    function format(value: number) {
-        let formatMoney = new Intl.NumberFormat('pt-BR', {
+    function convertDecimalToString(value: number) {
+        let format = Intl.NumberFormat("pt-BR", {
             style: 'currency',
             currency: 'BRL'
-        }).format(value);
+        });
 
-        return formatMoney.replace("R$", "").trimLeft();
+        return format.format(value).replace("R$", "").trimLeft();
+    }
+    
+    function convertStringToDecimal(value: string, maxChars: number) {
+        let valid = value.replace(/[^0-9\.]+/g, '').replaceAll(".", "").replace(",", ".");
+
+        if (valid.length === 0) {
+            return 0.00;
+        }
+
+        value = value.replaceAll(".", "").replace(",", ".");
+
+        let pointPosition = value.indexOf("."),
+            concatValue = `${value.substr(0, pointPosition)}${value.substr(pointPosition+1)}`;
+
+        if (concatValue.length > maxChars) {
+            concatValue = concatValue.substr(0, concatValue.length-1);
+        }
+
+        let positionPointAdjusted = concatValue.length - 2;
+
+        return parseFloat(`${concatValue.substr(0, positionPointAdjusted)}.${concatValue.substr(positionPointAdjusted)}`);
     }
 
     return (
@@ -87,22 +107,23 @@ export default function FormProduct(props: {showModal: boolean}) {
                         <Col xs={6}>
                             <Form.Group controlId="formGroupPricePurchase">
                                 <Form.Label>Preço compra*</Form.Label>
-                                <Form.Control type="text" defaultValue={format(pricePurchase)} placeholder="Preço compra" onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                                    let value = event.target.value.replace(".", "").replace(",", ".");
+                                <Form.Control type="text" value={convertDecimalToString(pricePurchase)} placeholder="Preço compra" onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                                    let value = event.target.value,
+                                        formatted = convertStringToDecimal(value, 17);
 
-                                    setPricePurchase(parseFloat(value));
+                                    setPricePurchase(formatted);
                                 }}/>
                             </Form.Group>
                         </Col>
                         <Col xs={6}>
                             <Form.Group controlId="formGroupProfitMargin">
                                 <Form.Label>Margem lucro</Form.Label>
-                                <Form.Control type="text" defaultValue={format(profitMargin)} placeholder="Margem lucro" onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                                    let value = event.target.value.replace(".", "").replace(",", ".");
+                                <Form.Control type="text" value={convertDecimalToString(profitMargin)} placeholder="Margem lucro" onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                                    let value = event.target.value,
+                                        formatted = convertStringToDecimal(value, 17);
 
-                                    setProfitMargin(parseFloat(value));
-
-                                    setPriceSale(pricePurchase + ((profitMargin/100) * pricePurchase));
+                                    setProfitMargin(formatted);
+                                    setPriceSale((((formatted / 100) * pricePurchase)) + pricePurchase);
                                 }}/>
                             </Form.Group>
                         </Col>
@@ -111,20 +132,22 @@ export default function FormProduct(props: {showModal: boolean}) {
                         <Col xs={6}>
                             <Form.Group controlId="formGroupPriceSale">
                                 <Form.Label>Preço venda*</Form.Label>
-                                <Form.Control type="text" defaultValue={format(priceSale)} value={format(priceSale)} placeholder="Preço venda" onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                                    let value = event.target.value.replace(".", "").replace(",", ".");
+                                <Form.Control type="text" value={convertDecimalToString(priceSale)} placeholder="Preço venda" onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                                    let value = event.target.value,
+                                        formatted = convertStringToDecimal(value, 17);
 
-                                    setPriceSale(parseFloat(value));
+                                    setPriceSale(formatted);
                                 }}/>
                             </Form.Group>
                         </Col>
                         <Col xs={6}>
                             <Form.Group controlId="formGroupPercentageProductCommission">
                                 <Form.Label>Porcentagem comissão</Form.Label>
-                                <Form.Control type="text" defaultValue={format(percentageProductCommission)} placeholder="Porcentagem comissão" onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                                    let value = event.target.value.replace(".", "").replace(",", ".");
+                                <Form.Control type="text" value={convertDecimalToString(percentageProductCommission)} placeholder="Porcentagem comissão" onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                                    let value = event.target.value,
+                                        formatted = convertStringToDecimal(value, 17);
 
-                                    setPercentageProductCommission(parseFloat(value));
+                                    setPercentageProductCommission(formatted);
                                 }}/>
                             </Form.Group>
                         </Col>
