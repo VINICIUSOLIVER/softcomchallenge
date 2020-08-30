@@ -23,12 +23,14 @@ export default function Home(props: RoutePropsContract) {
     const [showModal, setShowModal] = useState<boolean>(false);
 
     useEffect(() => {
+        searchProducts();
+    }, []);
+
+    useEffect(() => {
         if (!logged) {
             {props.history.push("/")}
-        } else {
-            searchProducts();
         }
-    }, []);
+    }, [logged]);
 
     async function searchProducts(): Promise<void> {
         setLoading(true);
@@ -58,7 +60,7 @@ export default function Home(props: RoutePropsContract) {
 
     return (
         <div>
-            <FormProduct showModal={showModal} />
+            <FormProduct showModal={showModal} closeModal={closeModal}/>
             <Row className="justify-content-md-center">
                 <Col xs={12} style={{backgroundColor: "#fff", paddingTop: 20, paddingBottom: 20, marginBottom: 20}}>
                     <Row className="justify-content-md-center">

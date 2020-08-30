@@ -24,7 +24,7 @@ class ProductList extends Component<ProductListContract, ProductListContract> {
                     <th>Estoque</th>
                     <th>Und. Medida</th>
                     <th>Vender</th>
-                    <th>Valor</th>
+                    <th>Valor(R$)</th>
                 </thead>
                 <tbody>
                     {this.props.data.map((item, key) => {

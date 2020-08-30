@@ -7,6 +7,7 @@ import CreateDeviceContract from "../../Contracts/Token/CreateDeviceContract";
 import ApiResponseContract from "../../Contracts/Default/ApiResponseContract";
 import TokenCreateContract from "../../Contracts/Token/TokenCreateContract";
 import {useAlert} from "../Alert/AlertContext";
+import history from "../../history";
 
 export const AuthContext = createContext<AuthContextContract>({} as AuthContextContract);
 
@@ -19,7 +20,7 @@ export default function AuthProvider(props: ChildrenContextContract) {
         if (!logged) {
             isLogged();
         }
-    }, []);
+    }, [logged]);
 
     async function isLogged(): Promise<boolean> {
         const clientId = localStorage.getItem("@softcomchallenge/client_id"),

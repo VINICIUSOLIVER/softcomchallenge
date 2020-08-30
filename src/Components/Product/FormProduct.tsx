@@ -4,7 +4,7 @@ import {storeProduct} from "../../Services/Product";
 import {useAuth} from "../../Contexts/Auth/AuthContext";
 import {useAlert} from "../../Contexts/Alert/AlertContext";
 
-export default function FormProduct(props: {showModal: boolean}) {
+export default function FormProduct(props: {showModal: boolean, closeModal: Function}) {
     const [name, setName] = useState<string>("");
     const [measuredUnit, setMeasuredUnit] = useState<string>("");
     const [groupOrder, setGroupOrder] = useState<number>(1);
@@ -13,6 +13,7 @@ export default function FormProduct(props: {showModal: boolean}) {
     const [pricePurchase, setPricePurchase] = useState<number>(0.0);
     const [profitMargin, setProfitMargin] = useState<number>(0.0);
     const {token} = useAuth();
+    const [validated, setValidated] = useState<object>({});
     const {success, warning, danger} = useAlert();
 
     function handle(event: FormEvent) {
@@ -31,7 +32,45 @@ export default function FormProduct(props: {showModal: boolean}) {
             preco_compra: pricePurchase,
             preco_venda: priceSale
         }]).then((response) => {
-            console.log(response.data);
+            if (response.data.code !== 1) {
+                danger(response.data.human);
+            }
+
+            if (response.data.data.fails.length > 0) {
+                response.data.data.fails.forEach((item: any) => {
+                    let keys = Object.keys(item.validation);
+
+                    for(let i=0;i<keys.length;i++) {
+                        let key = keys[i],
+                            message: string = "",
+                            currentValidated: any = {};
+
+                        message = item.validation[key].join(" ");
+
+                        currentValidated[key] = {
+                            valid: true,
+                            message: message
+                        };
+
+                        setValidated(Object.assign(validated, currentValidated));
+                    }
+                });
+
+                warning("Verifique as informações e tente novamente!");
+
+                return false;
+            }
+
+            if (response.data.data.fails.length === 0 && response.data.data.success.length > 0) {
+                closeModalValuesDefault();
+                success("Produto cadastrado com sucesso!");
+
+                return true;
+            }
+
+            danger("Ops! Algum problema aconteceu. Tente novamente!");
+
+            return false;
         })
     }
 
@@ -65,8 +104,44 @@ export default function FormProduct(props: {showModal: boolean}) {
         return parseFloat(`${concatValue.substr(0, positionPointAdjusted)}.${concatValue.substr(positionPointAdjusted)}`);
     }
 
+    function verifyValidate(key: string): boolean {
+        if (!validated.hasOwnProperty(key)) {
+            return false;
+        }
+        
+        // @ts-ignore
+        return validated[key].valid;
+    }
+
+    function verifyMessageValid(key: string): string {
+        if (!validated.hasOwnProperty(key)) {
+            return "";
+        }
+
+        // @ts-ignore
+        return validated[key].message;
+    }
+
+    function valuesDefault(): void {
+        setName("");
+        setPriceSale(0.00);
+        setPricePurchase(0.00);
+        setProfitMargin(0.00);
+        setPercentageProductCommission(0.00);
+        setGroupOrder(1);
+        setMeasuredUnit("");
+        setValidated({});
+    }
+
+    function closeModalValuesDefault(): void {
+        valuesDefault();
+        props.closeModal();
+    }
+
     return (
-        <Modal size="lg" show={props.showModal} backdrop="static" keyboard={false} animation={false} centered>
+        <Modal size="lg" show={props.showModal} onHide={() => {
+            closeModalValuesDefault();
+        }} backdrop="static" keyboard={false} animation={false} centered>
             <Modal.Header closeButton>
                 <Modal.Title>Adicionar Produto</Modal.Title>
             </Modal.Header>
@@ -76,9 +151,12 @@ export default function FormProduct(props: {showModal: boolean}) {
                         <Col xs={12}>
                             <Form.Group controlId="formGroupName">
                                 <Form.Label>Nome*</Form.Label>
-                                <Form.Control type="text" defaultValue="" placeholder="Nome" onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                                <Form.Control isInvalid={verifyValidate("nome")} type="text" defaultValue="" placeholder="Nome" onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                                     setName(event.target.value);
                                 }}/>
+                                <Form.Control.Feedback type="invalid">
+                                    {verifyMessageValid("nome")}
+                                </Form.Control.Feedback>
                             </Form.Group>
                         </Col>
                     </Row>

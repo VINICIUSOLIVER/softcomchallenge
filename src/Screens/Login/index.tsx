@@ -17,7 +17,7 @@ export default function Login(props: RoutePropsContract) {
         if (logged) {
             {props.history.push("/home")}
         }
-    }, []);
+    }, [logged]);
 
     const handle = (event: FormEvent) => {
         event.preventDefault();
@@ -55,7 +55,7 @@ export default function Login(props: RoutePropsContract) {
                             </div>
                             <Form.Group controlId="formGroupUrl">
                                 <Form.Label>URL*</Form.Label>
-                                <Form.Control type="text" defaultValue="" placeholder="URL" onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                                <Form.Control type="text" placeholder="URL" onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                                     setUrl(event.target.value);
                                 }}/>
                             </Form.Group>
