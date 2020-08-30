@@ -16,7 +16,8 @@ const ContainerLogin = styled.div((props : ContainerLoginContract) => ({
             "background-color": "#fff",
             "padding": "40px",
             "border-radius": "5px",
-            "box-shadow": "0 17px 20px rgba(31, 31, 31, 0.5)",
+            "box-shadow": "0 17px 20px rgba(31, 31, 31, 0.1)",
+            "border": "solid 1px #e6e6e6",
             ".form-logo": {
                 "width": "100%",
                 "display": "flex",

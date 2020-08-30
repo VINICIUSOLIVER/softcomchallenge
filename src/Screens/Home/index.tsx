@@ -19,11 +19,15 @@ export default function Home(props: RoutePropsContract) {
     const [dataView, setDataView] = useState<Array<ProductContract>>([]);
     const {setLoading} = useLoading();
     const {success, warning, danger} = useAlert();
-    const {token, singOut} = useAuth();
+    const {token, singOut, logged} = useAuth();
     const [showModal, setShowModal] = useState<boolean>(false);
 
     useEffect(() => {
-        searchProducts();
+        if (!logged) {
+            {props.history.push("/")}
+        } else {
+            searchProducts();
+        }
     }, []);
 
     async function searchProducts(): Promise<void> {

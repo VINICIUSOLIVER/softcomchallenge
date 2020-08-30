@@ -3,7 +3,6 @@ import {Form, Col, Row} from "react-bootstrap";
 import {ButtonWarning} from "../../Components/Buttons/Button";
 import ContainerLogin from "./Support/View/ContainerLogin";
 
-import {useLoading} from "../../Contexts/Loading/LoadingContext";
 import {useAuth} from "../../Contexts/Auth/AuthContext";
 import RoutePropsContract from "../../Contracts/Default/RoutePropsContract";
 import {useAlert} from "../../Contexts/Alert/AlertContext";
@@ -18,7 +17,7 @@ export default function Login(props: RoutePropsContract) {
         if (logged) {
             {props.history.push("/home")}
         }
-    })
+    }, []);
 
     const handle = (event: FormEvent) => {
         event.preventDefault();
